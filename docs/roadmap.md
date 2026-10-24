@@ -30,8 +30,8 @@ every decision:
   on purpose.** Build the substrate well first; choose the surface once the knowledge layers exist.
 
 ## Where we are today
-- eBPF captures process/file/syscall **and network** facts (the network module is now compiled in
-  and enabled by default — see the network track below).
+- eBPF captures process/file/network facts by default; syscall capture is opt-in. Successful
+  network I/O is summarized in userspace to keep the log stream manageable (see the network track below).
 - Facts are decoded to typed variants and serialized to NDJSON.
 - There is a **seed of an entity registry**: the `ProcessInfoCache` in
   [`src/sinks/json_sink.cpp`](../src/sinks/json_sink.cpp) already maintains per-process state with

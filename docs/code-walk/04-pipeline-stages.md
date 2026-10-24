@@ -46,7 +46,7 @@ Behavior details:
 - common header written first (`WriteHeader`)
 - `std::visit` dispatches per concrete event type
 - event-specific fields appended after the shared header and `process_info`
-- output is written to `/var/log/etracegen/events.ndjson` by default
+- output is written to `/tmp/etracegen/events_summary.ndjson` by default
 - file is created if missing and appended to when present
 - file rotates by delete-and-recreate once `max_file_size_bytes` is reached
 - strings are JSON-escaped before serialization

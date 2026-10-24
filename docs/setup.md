@@ -109,14 +109,19 @@ Current high-level controls are **domain toggles**:
 - `domains.syscall`
 - `domains.network_socket`
 
+Network socket capture is enabled by default. Successful socket I/O is summarized by process,
+socket, direction, transport, and endpoint every five seconds; routine nonblocking retries and
+socket option/name lookups are suppressed. Set `domains.network_socket: false` to disable it.
+
 Current mode is **capture-first**: allowlist/blocklist filtering (PID/UID/syscall/port) is present
 in the maps but disabled in the active flow. Domain toggles are the primary runtime controls. The
 planned signal-first policy profiles are described in [roadmap.md](roadmap.md).
 
 ## 8. Log Sink Notes
-- Default sink is file-based NDJSON (`sink.path`, e.g. `/var/log/etracegen/events.ndjson` or
-  `/tmp/etracegen/events.ndjson`).
+- Default sink is file-based NDJSON at `/tmp/etracegen/events_summary.ndjson` (override with
+  `sink.path`).
 - Parent directories are created if missing; the collector appends when the file exists.
+- The summary filename keeps new compact records separate from older per-syscall logs.
 - When `sink.max_file_size_bytes` is reached, the collector deletes and recreates the file.
 - Output is flushed periodically so external readers can consume it in near real time.
 
@@ -144,8 +149,8 @@ zgrep -E 'CONFIG_BPF|CONFIG_BPF_SYSCALL|CONFIG_BPF_JIT' /proc/config.gz
 After a `run`, verify unified process context is present on every record:
 ```bash
 # should print 0 when every record has process_info
-jq -c "select(.process_info == null)" /var/log/etracegen/events.ndjson | wc -l
+jq -c "select(.process_info == null)" /tmp/etracegen/events_summary.ndjson | wc -l
 
 # inspect enriched process fields
-head -n 20 /var/log/etracegen/events.ndjson | jq ".process_info"
+head -n 20 /tmp/etracegen/events_summary.ndjson | jq ".process_info"
 ```

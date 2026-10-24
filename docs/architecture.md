@@ -77,8 +77,8 @@ The kernel side is split by domain, but the build entrypoint stays stable:
 - Network domain: `../bpf/event_logger_network.bpf.c`
 
 > **Current state:** the aggregator `event_logger.bpf.c` includes the **process, file, syscall, and
-> network** modules. Network events are produced whenever `domains.network_socket: true` (the
-> default). Keeping the entrypoint stable means the network module slotted in with a single
+> network** modules. Network events are produced whenever `domains.network_socket: true` (enabled
+> by default), then successful socket I/O is summarized in userspace. Keeping the entrypoint stable means the network module slotted in with a single
 > `#include`, while the shared maps/helpers in `event_logger_common.bpf.h` are still defined once
 > (include guard).
 

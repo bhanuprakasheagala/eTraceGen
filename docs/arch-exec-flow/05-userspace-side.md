@@ -48,7 +48,7 @@ Current implementation is pass-through. Capture volume control is currently hand
 ## 6. JsonSink
 `json_sink.cpp` writes NDJSON records to a file-backed sink, not stdout.
 Current behavior:
-- default path is `/var/log/etracegen/events.ndjson`
+- default path is `/tmp/etracegen/events_summary.ndjson`
 - parent directories are created if needed
 - new events are appended when the file exists
 - file is rotated by delete-and-recreate when `max_file_size_bytes` is exceeded

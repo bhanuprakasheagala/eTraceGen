@@ -110,7 +110,7 @@ Start the collector, generate activity in a second terminal, stop with Ctrl-C.
 
 ```bash
 # terminal 1
-sudo ./scripts/linux.sh run            # uses config/default.yaml -> sink /tmp/etracegen/events.ndjson
+sudo ./scripts/linux.sh run            # uses config/default.yaml -> summary sink
 
 # terminal 2 — generate a mix of activity
 ls /tmp >/dev/null
@@ -119,7 +119,7 @@ echo hi >/tmp/etg_demo.txt && rm -f /tmp/etg_demo.txt
 for i in $(seq 1 50); do /bin/true; done     # short-lived processes (for the M3 check)
 ```
 
-Let `SINK=/tmp/etracegen/events.ndjson` for the checks below.
+Let `SINK=/tmp/etracegen/events_summary.ndjson` for the checks below.
 
 ### 6.1 Startup health
 - [ ] **Startup report** — read terminal 1 stderr, line `startup_report ...`.
@@ -175,10 +175,10 @@ Let `SINK=/tmp/etracegen/events.ndjson` for the checks below.
 
 ### 6.6 Domain toggles behave
 - [ ] With default config, `jq -r .type "$SINK" | sort | uniq -c` shows `process`, `file`, and
-  `network` but **no `syscall`** (default `domains.syscall: false`).
-  - Network is now compiled in and on by default (`network_socket: true`). Generate traffic
-    (`curl`, `getent hosts`, `nc`) and confirm `network` events appear with populated `flow_id`,
-    `event_name`, and `remote_*`/`local_*` fields.
+  `network` but **no `syscall`**.
+- [ ] Generate traffic (`curl`, `getent hosts`, `nc`) and confirm network lifecycle records and
+  periodic `io_summary` records include endpoints, operation counts, and transferred bytes.
+  Routine nonblocking retries and socket option/name lookups should not appear.
 - [ ] **Non-socket close is not a network event** — after touching/reading a regular file, confirm no
   `network` event with `"event_name":"close"` for that fd. Why: `close` gates on `is_socket_fd()`.
 

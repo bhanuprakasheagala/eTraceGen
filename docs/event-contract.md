@@ -30,10 +30,10 @@ All payloads begin with `event_header`:
 - **File:** `openat` / `unlinkat` / `renameat2` with enter/exit pairing and final `ret`.
 - **Syscall:** broad raw syscall capture via `raw_syscalls` (no allowlist gating in the active
   flow; disabled by default through `domains.syscall`).
-- **Network:** the schema and kernel handlers are fully defined and the network module is **compiled
-  into the BPF object and enabled by default**. The full socket-first taxonomy (control plane + data
-  plane) is captured as metadata-only records. See [architecture.md](architecture.md) §5 and the
-  socket-IO coverage-gap note in §7 below.
+- **Network:** the schema and kernel handlers are fully defined and the network module is compiled
+  into the BPF object and enabled by default. Lifecycle events are emitted individually; successful
+  socket I/O is aggregated into five-second userspace summaries. See [architecture.md](architecture.md)
+  §5 and the socket-IO coverage-gap note in §7 below.
 
 ## 4. Network Event Kinds (schema)
 The `network_event_kind` enum in [`event_schema.h`](../include/event_schema.h) defines the full

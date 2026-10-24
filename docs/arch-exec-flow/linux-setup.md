@@ -83,12 +83,12 @@ Full sequence:
 ```
 
 ## 7. Log Sink Notes
-- default sink is file-based NDJSON at `/var/log/etracegen/events.ndjson`
+- default sink is file-based NDJSON at `/tmp/etracegen/events_summary.ndjson`
 - collector appends when file exists
 - when `sink.max_file_size_bytes` threshold is reached, collector deletes and recreates the file
 
 ## 8. Capture-First Runtime Notes
-- default config enables process/file/syscall/network_socket domains
+- default config enables process/file/network domains; syscall capture is opt-in and network I/O is summarized
 - runtime allowlist/blocklist filtering is disabled in active flow
 - domain toggles remain the primary controls
 
@@ -115,8 +115,8 @@ Use these checks after `run` to verify unified process context is present:
 
 ```bash
 # should print 0 when every record has process_info
-jq -c "select(.process_info == null)" /var/log/etracegen/events.ndjson | wc -l
+jq -c "select(.process_info == null)" /tmp/etracegen/events_summary.ndjson | wc -l
 
 # inspect enriched process fields
-head -n 20 /var/log/etracegen/events.ndjson | jq ".process_info"
+head -n 20 /tmp/etracegen/events_summary.ndjson | jq ".process_info"
 ```
