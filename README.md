@@ -102,7 +102,7 @@ eTraceGen currently focuses on building a reliable **observation layer** for Lin
 | 🟢 Process | Process lifecycle (`fork`, `clone`, `exec`, `exit`) |
 | 🟢 File System | File operations (`open`, `rename`, `unlink`) |
 | 🟢 Syscalls | Raw syscall entry and exit tracing |
-| 🟢 Network | Socket lifecycle + socket I/O (`socket`, `connect`, `accept`, `bind`, `listen`, `send*`/`recv*`, `read`/`write`, `close`, …) — compiled in and enabled by default |
+| 🟢 Network | Socket lifecycle plus 5-second per-flow I/O summaries; routine retries and low-value lookups are suppressed |
 
 ## Runtime Features
 
@@ -116,10 +116,10 @@ eTraceGen currently focuses on building a reliable **observation layer** for Lin
 
 ## Network Scope
 
-> **Status:** the socket-layer instrumentation is **compiled into the BPF object and enabled by
-> default**. It captures the full socket-first taxonomy (control plane + data plane) as metadata-only
-> records — no protocol/payload inspection. This is a high-volume profile; see the noise/overhead
-> notes in the [roadmap](docs/roadmap.md).
+> **Status:** socket instrumentation is compiled into the BPF object and enabled by default.
+> Lifecycle events are logged individually; successful socket I/O is summarized by process, socket,
+> direction, transport, and endpoint over five-second intervals. Routine nonblocking retries and
+> socket option/name lookups are suppressed. Payloads are not inspected.
 
 ```text
 Application
@@ -266,6 +266,7 @@ Default behaviour:
 - NDJSON event logging
 - Automatic log rotation
 - Collector self-observation suppression
+- Successful socket I/O is summarized every five seconds; set `domains.network_socket: false` to disable network telemetry
 
 ---
 
@@ -296,6 +297,4 @@ P1 --> P2 --> P3 --> P4 --> P5
 > **Project Philosophy**
 >
 > Each phase delivers a usable foundation while preserving a clear separation between **observation**, **knowledge construction**, and **intelligence**.
-
-
 

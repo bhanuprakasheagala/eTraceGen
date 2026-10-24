@@ -41,9 +41,17 @@ add_executable(test_model_registry
 target_include_directories(test_model_registry PRIVATE include src)
 target_compile_options(test_model_registry PRIVATE -Wall -Wextra -Wpedantic)
 
+add_executable(test_json_sink
+  tests/test_json_sink.cpp
+  src/sinks/json_sink.cpp
+)
+target_include_directories(test_json_sink PRIVATE include src)
+target_compile_options(test_json_sink PRIVATE -Wall -Wextra -Wpedantic)
+
 enable_testing()
 add_test(NAME policy_process COMMAND test_policy_process)
 add_test(NAME model_registry COMMAND test_model_registry)
+add_test(NAME json_sink COMMAND test_json_sink)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBBPF REQUIRED libbpf)
