@@ -27,7 +27,7 @@ void Check(bool condition, const char* name) {
 void TestProcessEventAllowed() {
   event_logger::PolicyEngine policy;
 
-  event_logger::process_event ev{};
+  process_event ev{};
   ev.hdr.type = EVENT_TYPE_PROCESS;
   ev.hdr.pid = 1234;
   ev.hdr.tgid = 1234;
