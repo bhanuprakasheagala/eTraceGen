@@ -291,6 +291,7 @@ int main() {
   // Main loop keeps ingestion responsive and emits periodic kernel diagnostics.
   while (g_running) {
     collector->PollOnce(200);
+    sink->FlushDue();
 
     const auto now = clock::now();
     if (now >= next_stats_report) {
@@ -306,6 +307,7 @@ int main() {
   const bool has_kernel_stats = collector->ReadKernelBpfStats(&kernel_stats);
 
   collector->Stop();
+  sink->FlushPending();
 
   std::cerr << "received=" << metrics.received() << " decoded=" << metrics.decoded()
             << " dropped=" << metrics.dropped() << "\n";

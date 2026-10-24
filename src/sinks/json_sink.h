@@ -9,8 +9,10 @@
 
 #include <cstdint>
 #include <fstream>
+#include <map>
 #include <ostream>
 #include <string>
+#include <tuple>
 
 #include "sinks/sink.h"
 
@@ -47,7 +49,57 @@ class JsonSink final : public Sink {
    */
   void Write(const CanonicalEvent& event) override;
 
+  /**
+   * @brief Emit pending socket-I/O summaries and flush the output file.
+   */
+  void FlushPending();
+
+  /**
+   * @brief Emit socket-I/O summaries whose aggregation interval has elapsed.
+   */
+  void FlushDue();
+
  private:
+  struct NetworkSummaryKey {
+    uint32_t tgid = 0;
+    int32_t fd = 0;
+    uint32_t direction = 0;
+    uint32_t transport = 0;
+    uint32_t local_family = 0;
+    uint32_t local_port = 0;
+    std::string local_address;
+    std::string local_path;
+    uint32_t remote_family = 0;
+    uint32_t remote_port = 0;
+    std::string remote_address;
+    std::string remote_path;
+
+    bool operator<(const NetworkSummaryKey& other) const;
+  };
+
+  struct NetworkIoSummary {
+    event_header header{};
+    uint64_t entity_id = 0;
+    uint64_t first_ts_ns = 0;
+    uint64_t last_ts_ns = 0;
+    uint64_t last_update_mono_ns = 0;
+    uint64_t operations = 0;
+    uint64_t bytes_transferred = 0;
+    uint32_t direction = NETWORK_DIRECTION_UNKNOWN;
+    uint32_t transport = NETWORK_TRANSPORT_UNKNOWN;
+    int32_t fd = 0;
+    network_endpoint local{};
+    network_endpoint remote{};
+    std::string exec_path;
+    std::string cmdline;
+  };
+
+  struct NetworkSocketContext {
+    uint32_t transport = NETWORK_TRANSPORT_UNKNOWN;
+    network_endpoint local{};
+    network_endpoint remote{};
+  };
+
   /**
    *  Open sink file in append mode and initialize file size state.
    */
@@ -64,6 +116,10 @@ class JsonSink final : public Sink {
    *  Force immediate flush; used during rotation and teardown.
    */
   void ForceFlush();
+  void AccumulateNetworkIo(const CanonicalEvent& event, const network_event& raw);
+  void RememberNetworkContext(const network_event& raw);
+  void WriteNetworkSummary(const NetworkIoSummary& summary);
+  void WriteSerialized(const std::string& serialized);
 
   std::ofstream file_out_;
   std::string file_path_;
@@ -72,6 +128,9 @@ class JsonSink final : public Sink {
 
   uint64_t pending_records_since_flush_ = 0;
   uint64_t last_flush_mono_ns_ = 0;
+
+  std::map<NetworkSummaryKey, NetworkIoSummary> network_io_summaries_;
+  std::map<std::pair<uint32_t, int32_t>, NetworkSocketContext> network_socket_contexts_;
 
   bool ready_ = false;
 };

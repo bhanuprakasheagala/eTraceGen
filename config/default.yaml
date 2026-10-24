@@ -7,10 +7,7 @@ domains:
   file: true
   syscall: false
 
-  # Socket lifecycle + socket I/O events. The network eBPF module is now compiled
-  # into the BPF object, so this captures the full socket-first taxonomy (control
-  # plane + data plane). This is a high-volume "everything on" profile; per-kind
-  # runtime toggles can trim it later (see docs/roadmap.md, Milestone 2).
+  # Network telemetry stays enabled; successful socket I/O is summarized per flow every 5 seconds.
   network_socket: true
 
   dns: false
@@ -26,5 +23,5 @@ file_probes:
 sink:
   # File sink is mandatory. Collector appends to this file and rotates by
   # deleting/recreating once max_file_size_bytes is reached.
-  path: /tmp/etracegen/events.ndjson
+  path: /tmp/etracegen/events_summary.ndjson
   max_file_size_bytes: 104857600
